@@ -1,5 +1,10 @@
 window.addEventListener("DOMContentLoaded", () => {
   const button = document.getElementById("button");
+  const audio = document.getElementById("audio");
+
+  const toggleButtonState = () => {
+    button.toggleAttribute("disabled");
+  }
 
   const formatJoke = (data) => {
     let joke = "";
@@ -8,11 +13,12 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       joke = data.joke;
     }
-    return joke;
+    tellAJoke(joke);
   };
 
   const getJokes = async () => {
-    const apiUrl = "https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit";
+    const apiUrl =
+      "https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit";
     try {
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -22,6 +28,24 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  getJokes().then((data) => formatJoke(data));
+  const tellAJoke = (joke) => {
+    VoiceRSS.speech({
+      key: "Your API key",
+      src: joke,
+      hl: "en-gb",
+      v: "Alice",
+      r: -1,
+      c: "mp3",
+      f: "44khz_16bit_stereo",
+      ssml: false,
+    });
+    toggleButtonState();
+  };
 
+  button.addEventListener("click", () => {
+    getJokes().then((data) => formatJoke(data));
+  });
+  audio.addEventListener("ended", () => {
+    toggleButtonState();
+  });
 });
